@@ -61,7 +61,7 @@ public class RMIClient {
 				System.exit(-1);
 			}
 
-			System.out.println("Message " + (i+1) + "out of " + numMessages + " sent.")
+			System.out.println("Message " + (i+1) + "out of " + numMessages + " sent.");
 		}
 
 		try {
