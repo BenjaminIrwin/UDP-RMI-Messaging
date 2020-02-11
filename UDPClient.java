@@ -41,7 +41,7 @@ public class UDPClient {
 
 
 		UDPClient udpClient = new UDPClient();
-		udpClient.testLoop(serverAddr,recvPort,countTo);
+		udpClient.sendLoop(serverAddr,recvPort,countTo);
 
 		// TO-DO: Construct UDP client class and try to send messages
 	}
@@ -56,7 +56,7 @@ public class UDPClient {
 		}
 	}
 
-	private void testLoop(InetAddress serverAddr, int recvPort, int countTo) {
+	private void sendLoop(InetAddress serverAddr, int recvPort, int countTo) {
 		int				tries = 0;
 
 		while(tries<countTo) {
