@@ -53,7 +53,7 @@ public class RMIClient {
 		// TO-DO: Attempt to send messages the specified number of times
 		for (int i = 0; i < numMessages; i++) {
 			MessageInfo msg = new MessageInfo(numMessages, i);
-			System.out.println("printing numesages an i")
+			System.out.println("printing numesages an i");
 			System.out.println(numMessages);
 			System.out.println(i);
 
@@ -65,7 +65,7 @@ public class RMIClient {
 			}
 
 		}
-		System.out.println("normal exit")
+		System.out.println("normal exit");
 		System.exit(0);
 
 	}
