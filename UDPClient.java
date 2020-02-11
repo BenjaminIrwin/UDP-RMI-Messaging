@@ -10,7 +10,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-
+import java.util.concurrent.TimeUnit;
 import common.MessageInfo;
 
 public class UDPClient {
@@ -60,7 +60,7 @@ public class UDPClient {
 		int				tries = 0;
 
 		while(tries<countTo) {
-
+			TimeUnit.SECONDS.sleep(0.01);
 			send( countTo + ";" + tries, serverAddr, recvPort);
 			tries++;
 		}
