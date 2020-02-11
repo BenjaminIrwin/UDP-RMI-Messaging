@@ -53,20 +53,24 @@ public class RMIClient {
 		// TO-DO: Attempt to send messages the specified number of times
 		for (int i = 0; i < numMessages; i++) {
 			MessageInfo msg = new MessageInfo(numMessages, i);
-			System.out.println("printing numesages an i");
-			System.out.println(numMessages);
-			System.out.println(i);
 
 			try {
 				iRMIServer.receiveMessage(msg);
 			} catch (RemoteException e) {
-				System.err.println("Clientside Error: could not send message.");
+				System.err.println("Clientside Error: could not invoke server's receiveMessage function.");
 				System.exit(-1);
 			}
 
 		}
-		System.out.println("normal exit");
-		System.exit(0);
+
+		try {
+			iRMIServer.getMessageInfo();
+		} catch (RemoteException e) {
+			System.err.println("Clientside Error: could invoke server's getMessageInfo function.");
+			System.exit(-1);
+		}
+
+		System.exit(-1);
 
 	}
 }
