@@ -30,18 +30,23 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 
 	public void receiveMessage(MessageInfo msg) throws RemoteException {
 
+		System.out.println("Receiving Message");
+
 		// TO-DO: On receipt of first message, initialise the receive buffer
-		if (msg.messageNum == 0) {
+		if (receivedMessages == null) {
 			receivedMessages = new int[msg.totalMessages];
 			for (int i = 0; i < msg.totalMessages; i++) {
 				receivedMessages[i] = -1;
 			}
 
 			totalMessages = msg.totalMessages;
+			if(totalMessages <= 0) {
+				System.out.println("Must be one or more messages.");
+			}
 		}
 
 		// TO-DO: Log receipt of the message
-		receivedMessages[msg.messageNum] = 1;
+		receivedMessages[msg.messageNum - 1] = 1;
 		System.out.println("Received Message " + msg.messageNum + " of " + totalMessages);
 
 		// TO-DO: If this is the last expected message, then identify
@@ -49,7 +54,6 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 		if (msg.messageNum == totalMessages) {
 
 			int count = 0;
-
 			for (int i = 0; i < totalMessages; i++) {
 				if (receivedMessages[i] == 1) {
 					count++;
@@ -61,6 +65,9 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 			} else {
 				System.out.println("All messages received.");
 			}
+
+			receivedMessages = null;
+			System.exit(-1);
 
 		}
 	}
