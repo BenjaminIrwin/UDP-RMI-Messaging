@@ -35,9 +35,6 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 		// TO-DO: On receipt of first message, initialise the receive buffer
 		if (receivedMessages == null) {
 			receivedMessages = new int[msg.totalMessages];
-			for (int i = 0; i < msg.totalMessages; i++) {
-				receivedMessages[i] = -1;
-			}
 
 			totalMessages = msg.totalMessages;
 			if(totalMessages <= 0) {
@@ -46,30 +43,26 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 		}
 
 		// TO-DO: Log receipt of the message
-		receivedMessages[msg.messageNum - 1] = 1;
-		System.out.println("Received Message " + msg.messageNum + " of " + totalMessages);
+		receivedMessages[msg.messageNum] = 1;
+		System.out.println("Received Message " + (msg.messageNum + 1) + " of " + totalMessages);
 
-		// TO-DO: If this is the last expected message, then identify
-		//        any missing messages
-		if (msg.messageNum == totalMessages) {
 
-			int count = 0;
+	}
+
+	public void getMessageInfo()
+	{
+			int lost_count = 0;
 			for (int i = 0; i < totalMessages; i++) {
-				if (receivedMessages[i] == 1) {
-					count++;
+				if (receivedMessages[i] == 0) {
+					lost_count++;
 				}
 			}
 
-			if(count != totalMessages) {
-				System.out.println("Messages lost: " + (totalMessages - count));
+			if(lost_count > 0) {
+				System.out.println("Messages lost: " + lost_count);
 			} else {
 				System.out.println("All messages received.");
 			}
-
-			receivedMessages = null;
-			System.exit(-1);
-
-		}
 	}
 
 	public static void main(String[] args) {
@@ -110,7 +103,7 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 		Registry r = null;
 
 		try {
-			r = LocateRegistry.createRegistry(1099);//If can't create try get and if can't get then fails
+			r = LocateRegistry.createRegistry(1010);//If can't create try get and if can't get then fails
 		} catch (RemoteException e) {
 			try {
 				r = LocateRegistry.getRegistry();
