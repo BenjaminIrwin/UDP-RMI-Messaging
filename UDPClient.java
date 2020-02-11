@@ -13,6 +13,8 @@ import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 import common.MessageInfo;
 
+import java.lang.*;
+
 public class UDPClient {
 
 	private DatagramSocket sendSoc;
@@ -60,7 +62,14 @@ public class UDPClient {
 		int				tries = 0;
 
 		while(tries<countTo) {
-			TimeUnit.SECONDS.sleep(0.01);
+
+		    try{
+			Thread.sleep((long)100);
+		    }
+		    catch(InterruptedException e){
+			System.out.println("Sleep interrupted");
+			System.exit(-2);
+		    }
 			send( countTo + ";" + tries, serverAddr, recvPort);
 			tries++;
 		}
