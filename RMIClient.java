@@ -11,7 +11,7 @@ import java.rmi.*;
 
 import java.net.MalformedURLException;
 
-import common.MessageInfo;
+import common.*;
 
 //User defined RMI error exit codes:
 //1 - Insufficient command line arguments
@@ -37,6 +37,22 @@ public class RMIClient {
 				System.exit(4);
 			}
 		}
+
+	}
+
+	public static void sendSetOfMessages(RMIServerI iRMIServer,
+																	int numMessages) {
+
+		SetOfMessages set = new SetOfMessages(numMessages);
+
+		try {
+				iRMIServer.receiveSetOfMessages(set);
+			} catch (RemoteException e) {
+				System.err.println("Error (client): could not invoke " +
+						"RMIServer's receivePackageOfMessages function.");
+				System.exit(4);
+			}
+
 
 		try {
 			iRMIServer.getMessageInfo();
@@ -78,7 +94,20 @@ public class RMIClient {
 			System.exit(4);
 		}
 
+		long start_time = System.currentTimeMillis();
 		sendMessages(iRMIServer, numMessages);
+		//sendSetOfMessages(iRMIServer, numMessages);
+		long end_time = System.currentTimeMillis();
+
+		try {
+			iRMIServer.getMessageInfo();
+		} catch (RemoteException e) {
+			System.err.println("Error (client): could not invoke " +
+					"RMIServer's getMessageInfo function.");
+			System.exit(4);
+		}
+
+		System.out.println("Time taken to send & receive messages in ms: " + (end_time-start_time));
 
 		System.exit(0);
 
