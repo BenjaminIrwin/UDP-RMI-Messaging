@@ -78,7 +78,6 @@ public class RMIServer extends UnicastRemoteObject
     RMIServer rmis = null;
 
     try {
-      // TO-DO: Instantiate the server class
       rmis = new RMIServer();
     } catch (Exception e) {
       System.err.println("Error (server): could not create new " +
