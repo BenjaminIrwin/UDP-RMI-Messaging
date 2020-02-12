@@ -107,7 +107,8 @@ public class RMIClient {
 			System.exit(4);
 		}
 
-		System.out.println("Time taken to send & receive messages in ms: " + (end_time-start_time));
+		System.out.println("Time taken to send & receive messages in ms: "
+				+ (end_time-start_time));
 
 		System.exit(0);
 
