@@ -16,111 +16,106 @@ import java.rmi.*;
 
 import common.*;
 
-// A typical server program creates some remote objects, makes references to these objects accessible,
-// and waits for clients to invoke methods on these objects.
+//User defined RMI error exit codes:
+//1 - Insufficient command line arguments
+//2 - Malformed URL
+//3 - Bind failure
+//4 - Communication failure (remote exception)
+//5 - Server creation failure
+//6 - Invalid message number
 
-public class RMIServer extends UnicastRemoteObject implements RMIServerI {
+public class RMIServer extends UnicastRemoteObject
+    implements RMIServerI {
 
-	private int totalMessages = -1;
-	private int[] receivedMessages;
+  private int totalMessages = -1;
+  private int[] receivedMessages;
 
-	public RMIServer() throws RemoteException {
-		super();
-	}
+  public RMIServer() throws RemoteException {
+    super();
+  }
 
-	public void receiveMessage(MessageInfo msg) throws RemoteException {
+  public void receiveMessage(MessageInfo msg) throws RemoteException {
 
-		System.out.println("Receiving Message");
+    if (receivedMessages == null) {
+      receivedMessages = new int[msg.totalMessages];
 
-		// TO-DO: On receipt of first message, initialise the receive buffer
-		if (receivedMessages == null) {
-			receivedMessages = new int[msg.totalMessages];
+      totalMessages = msg.totalMessages;
+      if (totalMessages <= 0) {
+        System.out.println("Error (server): cannot receive less than "
+            + "one message.");
+        System.exit(6);
+      }
 
-			totalMessages = msg.totalMessages;
-			if(totalMessages <= 0) {
-				System.out.println("Must be one or more messages.");
-			}
-		}
+    }
 
-		// TO-DO: Log receipt of the message
-		receivedMessages[msg.messageNum] = 1;
-		System.out.println("Received Message " + (msg.messageNum + 1) + " of " + totalMessages);
+    receivedMessages[msg.messageNum] = 1;
+    System.out.println("Received Message " + (msg.messageNum + 1) +
+        " of " + totalMessages);
 
+  }
 
-	}
+  public void getMessageInfo() throws RemoteException {
+    int lost_count = 0;
+    for (int i = 0; i < totalMessages; i++) {
+      if (receivedMessages[i] == 0) {
+        lost_count++;
+      }
+    }
 
-	public void getMessageInfo() throws RemoteException {
-			int lost_count = 0;
-			for (int i = 0; i < totalMessages; i++) {
-				if (receivedMessages[i] == 0) {
-					lost_count++;
-				}
-			}
+    if (lost_count > 0) {
+      System.out.println("Messages lost: " + lost_count);
+    } else {
+      System.out.println("All messages received");
+    }
+  }
 
-			if(lost_count > 0) {
-				System.out.println("Messages lost: " + lost_count);
-			} else {
-				System.out.println("All messages received.");
-			}
-	}
+  public static void main(String[] args) {
 
-	public static void main(String[] args) {
+    if (System.getSecurityManager() == null) {
+      System.setSecurityManager(new SecurityManager());
+    }
 
-		// TO-DO: Initialise Security Manager
-			if(System.getSecurityManager() == null) {
-				System.setSecurityManager(new SecurityManager());
-			}
+    RMIServer rmis = null;
 
-		RMIServer rmis = null;
+    try {
+      // TO-DO: Instantiate the server class
+      rmis = new RMIServer();
+    } catch (Exception e) {
+      System.err.println("Error (server): could not create new " +
+          "RMIServer.");
+      System.exit(5);
+    }
 
-			try {
-				// TO-DO: Instantiate the server class
-				rmis = new RMIServer();
-			}
-			catch (Exception e) {
-				System.err.println("Server-side Error: could not create new RMIServer.");
-				System.exit(-1);
-			}
+    rebindServer("RMIServer", rmis);
 
-		rebindServer("RMIServer", rmis);
+  }
 
-		// TO-DO: Bind to RMI registry.
-			// Can use various mechanisms to obtain references to remote objects.
-			// For example, an application can register its remote objects with RMI's simple naming facility, the RMI registry.
+  protected static void rebindServer(String serverURL,
+                                     RMIServer server) {
 
-		}
+    Registry r = null;
 
-	protected static void rebindServer(String serverURL, RMIServer server) {
+    try {
+      r = LocateRegistry.createRegistry(1099);
+    } catch (RemoteException e) {
+      try {
+        r = LocateRegistry.getRegistry();
+      } catch (RemoteException e1) {
+        System.err.println("Error (server): could not create registry "
+            + "for rebinding.");
+        System.exit(4);
+      }
+    }
 
-		// TO-DO:
-		// Start / find the registry (hint use LocateRegistry.createRegistry(...)
-		// If we *know* the registry is running we could skip this (eg run rmiregistry in the start script)
-
-		// TO-DO:
-		// Now rebind the server to the registry (rebind replaces any existing servers bound to the serverURL)
-		// Note - Registry.rebind (as returned by createRegistry / getRegistry) does something similar but
-		// expects different things from the URL field.
-		Registry r = null;
-
-		try {
-			r = LocateRegistry.createRegistry(1099);//If can't create try get and if can't get then fails
-		} catch (RemoteException e) {
-			try {
-				r = LocateRegistry.getRegistry();
-			} catch (RemoteException e1){
-				System.err.println("Server-side Error: could not create registry for rebinding.");
-				System.exit(-1);
-			}
-		}
-
-		try {
-			Naming.rebind(serverURL, server);
-		} catch (RemoteException e) {
-			System.err.println("Server-side Error: could not rebind.");
-			System.exit(-1);
-		} catch (MalformedURLException e) {
-			System.err.println("Server-side Error: could not rebind with malformed URL.");
-			System.exit(-1);
-		}
-	}
+    try {
+      Naming.rebind(serverURL, server);
+    } catch (RemoteException e) {
+      System.err.println("Error (server): could not rebind.");
+      System.exit(4);
+    } catch (MalformedURLException e) {
+      System.err.println("Error (server): could not rebind with " +
+          "malformed URL.");
+      System.exit(2);
+    }
+  }
 }
