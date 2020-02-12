@@ -23,12 +23,15 @@ import common.*;
 //4 - Communication failure (remote exception)
 //5 - Server creation failure
 //6 - Invalid message number
+//7 - Empty set of messages received
 
 public class RMIServer extends UnicastRemoteObject
     implements RMIServerI {
 
   private int totalMessages = -1;
   private int[] receivedMessages;
+  private long start_time;
+  private long end_time;
 
   public RMIServer() throws RemoteException {
     super();
@@ -38,6 +41,7 @@ public class RMIServer extends UnicastRemoteObject
 
     if (receivedMessages == null) {
       receivedMessages = new int[msg.totalMessages];
+      start_time = System.currentTimeMillis();
 
       totalMessages = msg.totalMessages;
       if (totalMessages <= 0) {
@@ -49,8 +53,31 @@ public class RMIServer extends UnicastRemoteObject
     }
 
     receivedMessages[msg.messageNum] = 1;
-    System.out.println("Received Message " + (msg.messageNum + 1) +
-        " of " + totalMessages);
+    //System.out.println("Received Message " + (msg.messageNum + 1) +
+    //    " of " + totalMessages);
+
+  }
+
+  public void receiveSetOfMessages(SetOfMessages set)
+      throws RemoteException {
+
+      if(set == null) {
+        System.out.println("Error (server): empty set of messages " +
+            "received.");
+        System.exit(7);
+      }
+
+      receivedMessages = new int[set.msgs[0].totalMessages];
+      totalMessages = set.msgs[0].totalMessages;
+
+    for(int i = 0; i < set.msgs[0].totalMessages; i++) {
+      if(set.msgs[i] != null) {
+        receivedMessages[i] = 1;
+      }
+
+      System.out.println("Received Message " +
+          (i + 1) + " of " + totalMessages);
+    }
 
   }
 
