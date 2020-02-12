@@ -23,6 +23,30 @@ import common.MessageInfo;
 
 public class RMIClient {
 
+	public static void sendMessages(RMIServerI iRMIServer,
+																	int numMessages) {
+
+		for (int i = 0; i < numMessages; i++) {
+			MessageInfo msg = new MessageInfo(numMessages, i);
+
+			try {
+				iRMIServer.receiveMessage(msg);
+			} catch (RemoteException e) {
+				System.err.println("Error (client): could not invoke " +
+						"RMIServer's receiveMessage function.");
+				System.exit(4);
+			}
+		}
+
+		try {
+			iRMIServer.getMessageInfo();
+		} catch (RemoteException e) {
+			System.err.println("Error (client): could not invoke " +
+					"RMIServer's getMessageInfo function.");
+			System.exit(4);
+		}
+	}
+
 	public static void main(String[] args) {
 
 		RMIServerI iRMIServer = null;
@@ -36,12 +60,10 @@ public class RMIClient {
 		String urlServer = new String("rmi://" + args[0] + "/RMIServer");
 		int numMessages = Integer.parseInt(args[1]);
 
-		// TO-DO: Initialise Security Manager
 		if(System.getSecurityManager() == null) {
 			System.setSecurityManager(new SecurityManager());
 		}
 
-		// TO-DO: Bind to RMIServer
 		try {
 			iRMIServer = (RMIServerI) Naming.lookup(urlServer);
 		} catch (MalformedURLException e) {
@@ -56,27 +78,7 @@ public class RMIClient {
 			System.exit(4);
 		}
 
-		// TO-DO: Attempt to send messages the specified number of times
-		for (int i = 0; i < numMessages; i++) {
-			MessageInfo msg = new MessageInfo(numMessages, i);
-
-			try {
-				iRMIServer.receiveMessage(msg);
-			} catch (RemoteException e) {
-				System.err.println("Error (client): could not invoke " +
-						"RMIServer's receiveMessage function.");
-				System.exit(4);
-			}
-
-		}
-
-		try {
-			iRMIServer.getMessageInfo();
-		} catch (RemoteException e) {
-			System.err.println("Error (client): could not invoke " +
-					"RMIServer's getMessageInfo function.");
-			System.exit(4);
-		}
+		sendMessages(iRMIServer, numMessages);
 
 		System.exit(0);
 
