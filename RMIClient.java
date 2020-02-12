@@ -53,14 +53,6 @@ public class RMIClient {
 				System.exit(4);
 			}
 
-
-		try {
-			iRMIServer.getMessageInfo();
-		} catch (RemoteException e) {
-			System.err.println("Error (client): could not invoke " +
-					"RMIServer's getMessageInfo function.");
-			System.exit(4);
-		}
 	}
 
 	public static void main(String[] args) {
