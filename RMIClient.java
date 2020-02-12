@@ -13,19 +13,24 @@ import java.net.MalformedURLException;
 
 import common.MessageInfo;
 
-public class RMIClient {
+//User defined RMI error exit codes:
+//1 - Insufficient command line arguments
+//2 - Malformed URL
+//3 - Bind failure
+//4 - Communication failure (remote exception)
+//5 - Server creation failure
+//6 - Invalid message number
 
-	// A typical client program obtains a remote reference to one or more remote objects on a server
-	// and then invokes methods on them.
+public class RMIClient {
 
 	public static void main(String[] args) {
 
 		RMIServerI iRMIServer = null;
 
-		// Check arguments for Server host and number of messages
 		if (args.length < 2) {
-			System.err.println("Clientside Error: needs 2 arguments: ServerHostName/IPAddress, TotalMessageCount");
-			System.exit(-1);
+			System.err.println("Error (client): needs 2 arguments: " +
+					"ServerHostName/IPAddress, TotalMessageCount");
+			System.exit(1);
 		}
 
 		String urlServer = new String("rmi://" + args[0] + "/RMIServer");
@@ -40,14 +45,15 @@ public class RMIClient {
 		try {
 			iRMIServer = (RMIServerI) Naming.lookup(urlServer);
 		} catch (MalformedURLException e) {
-			System.err.println("Clientside Error: malformed server URL.");
-			System.exit(-1);
+			System.err.println("Error (client): malformed server URL.");
+			System.exit(2);
 		} catch (NotBoundException e) {
-			System.err.println("Clientside Error: client-server bind failed.");
-			System.exit(-1);
+			System.err.println("Error (client): client-server bind failed.");
+			System.exit(3);
 		} catch (RemoteException e) {
-			System.err.println("Clientside Error: client-server communication failed.");
-			System.exit(-1);
+			System.err.println("Error (client): client-server communication "
+					+ "failed.");
+			System.exit(4);
 		}
 
 		// TO-DO: Attempt to send messages the specified number of times
@@ -57,21 +63,21 @@ public class RMIClient {
 			try {
 				iRMIServer.receiveMessage(msg);
 			} catch (RemoteException e) {
-				System.err.println("Clientside Error: could not invoke server's receiveMessage function.");
-				System.exit(-1);
+				System.err.println("Error (client): could not invoke " +
+						"RMIServer's receiveMessage function.");
+				System.exit(4);
 			}
 
-			System.out.println("Message " + (i+1) + "out of " + numMessages + " sent.");
 		}
 
 		try {
 			iRMIServer.getMessageInfo();
 		} catch (RemoteException e) {
-			System.err.println("Clientside Error: could invoke server's getMessageInfo function.");
-			System.exit(-1);
+			System.err.println("Error (client): could not invoke " +
+					"RMIServer's getMessageInfo function.");
+			System.exit(4);
 		}
 
-		
 		System.exit(0);
 
 	}
