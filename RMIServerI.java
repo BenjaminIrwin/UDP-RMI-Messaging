@@ -12,5 +12,8 @@ public interface RMIServerI extends Remote {
 
 	public void receiveMessage(MessageInfo msg) throws RemoteException;
 
+	public void receiveSetOfMessages(SetOfMessages set)
+			throws RemoteException;
+
 	public void getMessageInfo() throws RemoteException;
 }
