@@ -1,5 +1,5 @@
 /*
- * Created on 01-Mar-2016
+ * Robin Hendrickx and Benjamin Irwin
  */
 package udp;
 
@@ -32,20 +32,22 @@ public class UDPClient {
 
 	try {
 	    serverAddr = InetAddress.getByName(args[0]);
-	} catch (UnknownHostException e) {
-	    System.out.println("Bad server address in UDPClient, " + args[0] + " caused an unknown host exception " + e);
+	}
+	catch (UnknownHostException e) {
+	    System.out.println("Bad server address in UDPClient, " + args[0] +
+			       " caused an unknown host exception " + e);
 	    System.exit(-1);
 	}
 
 	recvPort = Integer.parseInt(args[1]);
 	countTo = Integer.parseInt(args[2]);
 
-
+	// Create UPD client
 	UDPClient udpClient = new UDPClient();
-		
-	udpClient.testLoop(serverAddr,recvPort,countTo);
 
-	// TO-DO: Construct UDP client class and try to send messages
+	// Sendmessages
+	udpClient.sendLoop(serverAddr,recvPort,countTo);
+
     }
 
     public UDPClient() {
@@ -58,43 +60,62 @@ public class UDPClient {
 	}
     }
 
-    private void testLoop(InetAddress serverAddr, int recvPort, int countTo) {
+    private void sendLoop(InetAddress serverAddr, int recvPort, int countTo) {
 
 	int tries = 0;
 
+	
 	try{
+	    // Set and log size of send buffer
+	    // sendSoc.setSendBufferSize(106496);		    
 	    System.out.println("Size of send buffer: " + sendSoc.getSendBufferSize());
+
+	    // Loop to send messages
+	    while(tries<countTo) {
+		
+		send( countTo + ";" + tries, serverAddr, recvPort);
+		tries++;
+	    }
+
+	    System.out.println("All messages sent.");
+
 	}
 	
 	catch (SocketException e){
-	    System.out.println("Could not fetch send buffer size");
+	    System.out.println("Could not fetch send buffer size.");
 	}
 	
-		
-	while(tries<countTo) {
-
-	    send( countTo + ";" + tries, serverAddr, recvPort);
-	    tries++;
-	}
-
+	       
 	return;
     }
 
     private void send(String payload, InetAddress destAddr, int destPort) {
-	int				payloadSize;
-	byte[]				pktData;
-	DatagramPacket		pkt;
 
+	int payloadSize;
+	byte[] pktData;
+	DatagramPacket pkt;
+
+	// Sleep to ensure there are no receive buffer exhaustions
+	/*
+	  try{
+	  Thread.sleep((long)1);
+	  }
+	  catch(InterruptedException e){
+	  System.out.println("Sleep interrupted.");
+	  }
+	*/
+	
 	try {
+
+	    // Serialize object 
 	    MessageInfo messageInfo = new MessageInfo(payload);
 	    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	    ObjectOutputStream os = new ObjectOutputStream(outputStream);
 	    os.writeObject(messageInfo);
-
 	    pktData = outputStream.toByteArray();
-
 	    payloadSize = pktData.length;
 
+	    // Build datagram packet and send
 	    pkt = new DatagramPacket(pktData, payloadSize, destAddr, destPort);
 	    sendSoc.send(pkt);
 	}
@@ -107,6 +128,6 @@ public class UDPClient {
 	}
 
 	return;
-	// TO-DO: build the datagram packet and send it to the server
+        
     }
 }
